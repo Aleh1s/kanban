@@ -1,0 +1,67 @@
+package ua.taskmate.kanban.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "member")
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+public class Member {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private MemberRole role;
+
+    @Column(name = "user_id", nullable = false)
+    private String userId;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private Board board;
+
+    @Builder.Default
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Issue> issues = new ArrayList<>();
+
+    @Builder.Default
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments = new ArrayList<>();
+
+    @Builder.Default
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Assignee> assignees = new ArrayList<>();
+
+    public void addIssue(Issue issue) {
+        this.issues.add(issue);
+        issue.setCreator(this);
+    }
+
+    public void deleteIssue(Issue issue) {
+        this.issues.remove(issue);
+        issue.setCreator(null);
+    }
+
+}
