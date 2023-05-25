@@ -33,3 +33,4 @@ build/
 .vscode/
 
 /src/main/resources/secrets.yaml
+docker.db.env

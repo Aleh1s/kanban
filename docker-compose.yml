@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  postgres:
+    container_name: taskmate
+    image: postgres:15
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db_data:/var/lib/postgresql
+    env_file:
+      - docker.db.env
