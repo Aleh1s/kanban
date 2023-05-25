@@ -1,5 +1,6 @@
 package ua.taskmate.kanban;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,4 +18,8 @@ public class KanbanApplication {
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
+
+	@Bean
+	public JsonMapper jsonMapper() {return new JsonMapper();}
+
 }

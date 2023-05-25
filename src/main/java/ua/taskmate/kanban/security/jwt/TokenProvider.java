@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ua.taskmate.kanban.dto.AuthenticationRequest;
+import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.security.UserDetailsImpl;
 
 import java.util.Date;
@@ -33,11 +34,11 @@ public class TokenProvider {
                 .before(new Date());
     }
 
-    public String generateToken(AuthenticationRequest authenticationRequest) {
+    public String generateToken(User user) {
         Date now = new Date();
         Date expired = new Date(now.getTime() + TimeUnit.HOURS.toMillis(1));
         return Jwts.builder()
-                .setSubject(authenticationRequest.userId())
+                .claim("userId", user.getId())
                 .setIssuedAt(now)
                 .setExpiration(expired)
                 .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
