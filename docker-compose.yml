@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   postgres:
-    container_name: taskmate-postgres
+    container_name: taskmate
     image: postgres:15
     ports:
       - '5432:5432'
