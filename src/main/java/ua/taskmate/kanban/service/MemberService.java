@@ -20,13 +20,18 @@ public class MemberService {
     public Member getMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Member with id %d does not exist", id)));
+                        String.format("Member with userId %d does not exist", id)));
     }
 
     public Member getMemberByUserId(String userId) {
         return memberRepository.findMemberByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("Member with userId %s does not exist", userId)));
+    }
+
+    public Member getPopulatedMemberById(Long id) {
+        Member member = getMemberById(id);
+        return null;
     }
 
     @Transactional

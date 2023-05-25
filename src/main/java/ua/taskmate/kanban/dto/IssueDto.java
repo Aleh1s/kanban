@@ -5,7 +5,6 @@ import lombok.Data;
 import ua.taskmate.kanban.entity.Status;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -16,7 +15,4 @@ public class IssueDto {
     private String title;
     private String description;
     private Status status;
-    private MemberDto creator;
-    private List<CommentDto> comments;
-    private List<AssigneeDto> assignees;
 }

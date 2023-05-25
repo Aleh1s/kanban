@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ua.taskmate.kanban.exception.IllegalActionException;
+import ua.taskmate.kanban.exception.ActionWithoutRightsException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.exception.ValidationException;
 
@@ -32,8 +32,8 @@ public class ExceptionHandlerController {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(IllegalActionException.class)
-    public ResponseEntity<String> handleIllegalActionException(IllegalActionException exception){
+    @ExceptionHandler(ActionWithoutRightsException.class)
+    public ResponseEntity<String> handleActionWithoutRights(ActionWithoutRightsException exception){
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
     }
 }

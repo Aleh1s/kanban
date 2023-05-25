@@ -72,17 +72,15 @@ public class BoardController {
         return ResponseEntity.ok(boardDtoList);
     }
 
-    @DeleteMapping("/{boardId}/members/{memberId}")
-    public ResponseEntity<?> deleteMember(@PathVariable("boardId") Long boardId,
-                                          @PathVariable("memberId") Long memberId) {
-        boardService.deleteMember(boardId, memberId);
+    @DeleteMapping("/members/{id}")
+    public ResponseEntity<?> deleteMember(@PathVariable("id") Long id) {
+        boardService.deleteMemberById(id);
         return ResponseEntity.noContent().build();
     }
 
-
-//    @GetMapping("/{id}")
+//    @GetMapping("/{boardId}")
 //    public ResponseEntity<BoardDto> getBoard(
-//            @PathVariable("id") Long boardId,
+//            @PathVariable("boardId") Long boardId,
 //            @RequestParam(value = "includeCancelled", required = false, defaultValue = "false") boolean includeCancelled
 //    ) {
 //        Board board = boardService.getBoardByIdFetchMembersFetchIssues(boardId, includeCancelled);

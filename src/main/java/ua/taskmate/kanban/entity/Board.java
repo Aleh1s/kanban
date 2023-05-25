@@ -44,12 +44,12 @@ public class Board {
 
     @Builder.Default
     @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Issue> issues = new ArrayList<>();
 
     @Builder.Default
     @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Invite> invites = new ArrayList<>();
 
     public void addMember(Member member) {

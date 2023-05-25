@@ -2,12 +2,15 @@ package ua.taskmate.kanban.service;
 
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.taskmate.kanban.entity.*;
-import ua.taskmate.kanban.exception.IllegalActionException;
+import ua.taskmate.kanban.exception.ActionWithoutRightsException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.repository.BoardRepository;
+import ua.taskmate.kanban.util.Util;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,24 +27,16 @@ public class BoardService {
     public Board getBoardById(Long id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Board with id %d does not exist!", id)));
-    }
-
-    public Board getBoardByIdFetchMembersFetchIssues(Long id, boolean includeCancelledIssues) {
-        Board board = boardRepository.findBoardByIdFetchIssues(id, includeCancelledIssues)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Board with id %d does not exist!", id)));
-        Hibernate.initialize(board.getMembers());
-        return board;
+                        String.format("Board with userId %d does not exist!", id)));
     }
 
     @Transactional
     public void save(Board board) {
+        UserDetails principal = Util.getPrincipal();
         Member owner = Member.builder()
                 .role(MemberRole.OWNER)
-                .userId("some_id")
+                .userId(principal.getUsername())
                 .build();
-
         boardRepository.save(board);
         board.addMember(owner);
         memberService.save(owner);
@@ -49,23 +44,23 @@ public class BoardService {
 
     @Transactional
     public void deleteBoardById(Long id) {
+        UserDetails principal = Util.getPrincipal();
         Board boardToDelete = getBoardById(id);
-
-        boolean isUserOwner = boardToDelete.getMembers().stream()
-                .filter(member -> member.getRole().equals(MemberRole.OWNER))
-                .anyMatch(member -> member.getUserId().equals("some_id"));
-
-        if (!isUserOwner) {
-            throw new IllegalActionException(
+        if (!hasRightToDeleteBoard(principal.getUsername(), boardToDelete)) {
+            throw new ActionWithoutRightsException(
                     "You have not grant to delete this board. Only owner can delete this board!");
         }
-
         boardRepository.delete(boardToDelete);
     }
 
     @Transactional
     public void updateBoardById(Long id, Board updatedBoard) {
+        UserDetails principal = Util.getPrincipal();
         Board boardToUpdate = getBoardById(id);
+        if (!hasRightToUpdateBoard(principal.getUsername(), boardToUpdate)) {
+            throw new ActionWithoutRightsException(
+                    "You have not grant to update this board. Only owner and admin can update this board!");
+        }
         boardToUpdate.setName(updatedBoard.getName());
         boardToUpdate.setImageUrl(updatedBoard.getImageUrl());
         boardToUpdate.setUpdatedAt(LocalDateTime.now());
@@ -73,27 +68,53 @@ public class BoardService {
 
     @Transactional
     public void updateRole(Long memberId, Long boardId, MemberRole role) {
+        UserDetails principal = Util.getPrincipal();
         Board board = getBoardById(boardId);
-
-        // todo: check if this user has grant to update role
-
+        if (!hasRightToUpdateBoard(principal.getUsername(), board)) {
+            throw new ActionWithoutRightsException(
+                    "You have not grant to change role of member of this board. Only owner and admin can do this!");
+        }
         Member member = memberService.getMemberById(memberId);
         member.setRole(role);
     }
 
     public List<Board> getBoardsOfCurrentUser() {
-        String userId = "some_id"; //todo: get userId from auth context
-        List<Member> members = memberService.getMembersByUserIdFetchBoard(userId);
+        UserDetails principal = Util.getPrincipal();
+        List<Member> members = memberService.getMembersByUserIdFetchBoard(principal.getUsername());
         return members.stream()
                 .map(Member::getBoard)
                 .collect(Collectors.toList());
     }
 
-    public void deleteMember(Long boardId, Long memberId) {
-        Board board = getBoardById(boardId);
+    @Transactional
+    public void deleteMemberById(Long id) {
+        Member member = memberService.getMemberById(id);
+        Board board = member.getBoard();
+        if (!hasRightToUpdateBoard(member.getUserId(), board)) {
+            throw new ActionWithoutRightsException(
+                    "You have not grant to delete member from this board. Only owner and admin can do this!");
+        }
+        board.deleteMember(member);
+    }
 
-        // todo: check if this user has grant to update role
+    private boolean hasRightToDeleteBoard(String userId, Board board) {
+        Member currentMember = memberService.getMemberByUserId(userId);
+        boolean isMemberOfBoard = board.getMembers().stream()
+                .anyMatch(member -> member.equals(currentMember));
+        if (isMemberOfBoard) {
+            return currentMember.getRole().equals(MemberRole.OWNER);
+        }
+        return false;
+    }
 
-        memberService.deleteMemberById(memberId);
+    private boolean hasRightToUpdateBoard(String userId, Board board) {
+        Member currentMember = memberService.getMemberByUserId(userId);
+        boolean isMemberOfBoard = board.getMembers().stream()
+                .anyMatch(member -> member.equals(currentMember));
+        if (isMemberOfBoard) {
+            MemberRole memberRole = currentMember.getRole();
+            return memberRole.equals(MemberRole.OWNER) || memberRole.equals(MemberRole.ADMIN);
+        }
+        return false;
     }
 }

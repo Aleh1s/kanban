@@ -60,4 +60,23 @@ public class Issue {
             orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Assignee> assignees = new ArrayList<>();
 
+    public void addAssignee(Assignee assignee) {
+        this.assignees.add(assignee);
+        assignee.setIssue(this);
+    }
+
+    public void deleteAssignee(Assignee assignee) {
+        this.assignees.remove(assignee);
+        assignee.setIssue(null);
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setIssue(this);
+    }
+
+    public void deleteComment(Comment comment) {
+        this.comments.remove(comment);
+        comment.setIssue(null);
+    }
 }

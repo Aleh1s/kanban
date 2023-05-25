@@ -81,4 +81,10 @@ public class Mapper {
 
     }
 
+    public Comment toComment(CommentCreationDto dto) {
+        return Comment.builder()
+                .content(dto.content())
+                .build();
+    }
+
 }

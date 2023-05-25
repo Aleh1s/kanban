@@ -12,5 +12,4 @@ public class CommentDto {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
     private String content;
-    private MemberDto creator;
 }

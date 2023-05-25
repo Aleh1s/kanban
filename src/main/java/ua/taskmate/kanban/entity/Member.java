@@ -64,4 +64,23 @@ public class Member {
         issue.setCreator(null);
     }
 
+    public void addAssignee(Assignee assignee) {
+        this.assignees.add(assignee);
+        assignee.setMember(this);
+    }
+
+    public void deleteAssignee(Assignee assignee) {
+        this.assignees.remove(assignee);
+        assignee.setMember(null);
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setCreator(this);
+    }
+
+    public void deleteComment(Comment comment) {
+        this.comments.remove(comment);
+        comment.setCreator(null);
+    }
 }
