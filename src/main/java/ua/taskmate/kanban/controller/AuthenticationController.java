@@ -2,6 +2,8 @@ package ua.taskmate.kanban.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,12 @@ import ua.taskmate.kanban.service.AuthenticationService;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
+    private static final Logger log = LogManager.getLogger(AuthenticationController.class);
 
     private final AuthenticationService authenticationService;
 
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
     @Value("${security.oauth2.client.id}")
     private String clientId;
     @Value("${security.oauth2.redirectUri}")
@@ -40,6 +45,7 @@ public class AuthenticationController {
     @PostMapping("/oauth")
     public ResponseEntity<TokenResponse> authorize(@RequestBody @Valid CodeRequest codeRequest,
                                                    BindingResult bindingResult) {
+        log.info("spring.datasource.url={}", datasourceUrl);
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
