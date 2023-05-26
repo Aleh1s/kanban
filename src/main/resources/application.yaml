@@ -15,4 +15,4 @@ spring:
           auto: create-drop
     open-in-view: false
   profiles:
-    active: prod
+    active: dev
