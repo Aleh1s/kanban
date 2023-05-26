@@ -11,8 +11,6 @@ spring:
         show_sql: true
         format_sql: true
         highlight_sql: true
-        hbm2ddl:
-          auto: create-drop
     open-in-view: false
   profiles:
     active: dev
