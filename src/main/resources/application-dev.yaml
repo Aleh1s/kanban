@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskmate
+    username: postgres
+    password: 123
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+security:
+  oauth2:
+    client:
+      id: ${SECURITY_OAUTH2_CLIENT_ID}
+      secret: ${SECURITY_OAUTH2_CLIENT_SECRET}
+    redirectUri: ${SECURITY_OAUTH2_REDIRECT_URI}

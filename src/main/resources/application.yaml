@@ -14,5 +14,5 @@ spring:
         hbm2ddl:
           auto: create-drop
     open-in-view: false
-  config:
-    import: optional:secrets.yaml
+  profiles:
+    active: prod
