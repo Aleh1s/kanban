@@ -8,8 +8,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ua.taskmate.kanban.dto.BoardCreationDto;
 import ua.taskmate.kanban.dto.BoardDto;
-import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.dto.UpdateMemberRoleDto;
+import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.MemberRole;
 import ua.taskmate.kanban.exception.ValidationException;
@@ -77,6 +77,7 @@ public class BoardController {
         boardService.deleteMemberById(id);
         return ResponseEntity.noContent().build();
     }
+
 
 //    @GetMapping("/{boardId}")
 //    public ResponseEntity<BoardDto> getBoard(

@@ -16,7 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import ua.taskmate.kanban.constant.ApplicationConstant;
-import ua.taskmate.kanban.dto.TokenRequest;
+import ua.taskmate.kanban.dto.CodeRequest;
 import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.exception.ForbiddenException;
 import ua.taskmate.kanban.repository.UserRepository;
@@ -41,8 +41,8 @@ public class AuthenticationService {
     @Value("${security.oauth2.redirectUri}")
     private String redirectUri;
     @Transactional
-    public String authenticate(TokenRequest tokenRequest) {
-        String idToken = getIdToken(tokenRequest.code())
+    public String authenticate(CodeRequest codeRequest) {
+        String idToken = getIdToken(codeRequest.code())
                 .orElseThrow(() -> new ForbiddenException("Unable to get token!"));
         String sub = parseSub(idToken);
         Optional<User> userOptional = userRepository.findUserBySub(sub);

@@ -1,16 +1,18 @@
 package ua.taskmate.kanban.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import ua.taskmate.kanban.constant.ApplicationConstant;
-import ua.taskmate.kanban.dto.TokenRequest;
+import ua.taskmate.kanban.dto.CodeRequest;
 import ua.taskmate.kanban.dto.TokenResponse;
 import ua.taskmate.kanban.dto.UrlResponse;
+import ua.taskmate.kanban.exception.ValidationException;
 import ua.taskmate.kanban.service.AuthenticationService;
 
 @RestController
@@ -36,8 +38,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/oauth")
-    public ResponseEntity<TokenResponse> authorize(@RequestBody TokenRequest tokenRequest) {
-        String jwtToken = authenticationService.authenticate(tokenRequest);
+    public ResponseEntity<TokenResponse> authorize(@RequestBody @Valid CodeRequest codeRequest,
+                                                   BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult.getAllErrors());
+        }
+        String jwtToken = authenticationService.authenticate(codeRequest);
         return new ResponseEntity<>(new TokenResponse(jwtToken), HttpStatus.OK);
     }
 }
