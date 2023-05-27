@@ -11,5 +11,3 @@ spring:
         highlight_sql: true
         hbm2ddl:
           auto: create-drop
-  config:
-    import: secrets.yaml

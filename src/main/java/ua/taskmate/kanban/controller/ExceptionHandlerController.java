@@ -62,4 +62,18 @@ public class ExceptionHandlerController {
                 .payload(exception.getMessage()).build();
         return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<RestExceptionDto> handleBadRequest(BadRequestException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<RestExceptionDto> handleAuthentication(AuthenticationException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_GATEWAY);
+    }
 }

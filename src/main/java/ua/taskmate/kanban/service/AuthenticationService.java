@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,10 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ua.taskmate.kanban.constant.ApplicationConstant;
 import ua.taskmate.kanban.dto.CodeRequest;
 import ua.taskmate.kanban.entity.User;
+import ua.taskmate.kanban.exception.AuthenticationException;
 import ua.taskmate.kanban.exception.ForbiddenException;
 import ua.taskmate.kanban.security.jwt.TokenProvider;
 
@@ -27,6 +31,8 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthenticationService {
+
+    private static final Logger log = LogManager.getLogger(AuthenticationService.class);
 
     private final UserService userService;
     private final ObjectMapper objectMapper;
@@ -48,7 +54,6 @@ public class AuthenticationService {
         } else {
             userService.saveUser(user);
         }
-
         return tokenProvider.generateToken(user);
     }
 
@@ -66,7 +71,14 @@ public class AuthenticationService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(ApplicationConstant.TOKEN_URL, request, String.class);
+
+        ResponseEntity<String> response;
+        try {
+             response = restTemplate.postForEntity(ApplicationConstant.TOKEN_URL, request, String.class);
+        } catch (RestClientException e) {
+            log.error(e.getMessage(), e);
+            throw new AuthenticationException("Something went wrong during authorization. Please try again later.");
+        }
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             return Optional.empty();
