@@ -133,4 +133,35 @@ public class Mapper {
                 .status(issue.getStatus())
                 .build();
     }
+
+    public FullMemberDto toFullMemberDto(Member member) {
+        UserDto user = toUserDto(member.getUser());
+        BoardDto board = toBoardDto(member.getBoard());
+        List<IssueDto> issues = member.getIssues().stream()
+                .map(this::toIssueDto)
+                .toList();
+        List<CommentDto> comments = member.getComments().stream()
+                .map(this::toCommentDto)
+                .toList();
+        return FullMemberDto.builder()
+                .id(member.getId())
+                .createdAt(member.getCreatedAt())
+                .updatedAt(member.getUpdatedAt())
+                .role(member.getRole())
+                .user(user)
+                .board(board)
+                .issues(issues)
+                .comments(comments)
+                .build();
+    }
+
+    private UserDto toUserDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFistName())
+                .lastName(user.getLastName())
+                .profileImageUrl(user.getProfileImageUrl())
+                .build();
+    }
 }

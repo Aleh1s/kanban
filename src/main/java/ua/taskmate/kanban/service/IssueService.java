@@ -40,12 +40,12 @@ public class IssueService {
 
     @Transactional
     public void save(Long boardId, Issue issue) {
-        UserDetails principal = Util.getPrincipal();
+        String userId = Util.getPrincipal().getUsername();
         Board board = boardService.getBoardById(boardId);
-        if (!hasRightToCreateIssue(principal.getUsername(), board)) {
+        if (!hasRightToCreateIssue(userId, board)) {
             throw new ActionWithoutRightsException("You have no rights to create issue on this board!");
         }
-        Member member = memberService.getMemberByUserId(principal.getUsername());
+        Member member = memberService.getMemberByUserIdAndBoardId(userId, boardId);
         member.addIssue(issue);
         board.addIssue(issue);
         issueRepository.save(issue);

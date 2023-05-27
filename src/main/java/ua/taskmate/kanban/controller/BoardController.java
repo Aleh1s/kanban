@@ -6,15 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ua.taskmate.kanban.dto.BoardCreationDto;
-import ua.taskmate.kanban.dto.BoardDto;
-import ua.taskmate.kanban.dto.FullBoardDto;
-import ua.taskmate.kanban.dto.MemberRoleDto;
+import ua.taskmate.kanban.dto.*;
 import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.entity.Board;
+import ua.taskmate.kanban.entity.Member;
 import ua.taskmate.kanban.entity.MemberRole;
 import ua.taskmate.kanban.exception.ValidationException;
 import ua.taskmate.kanban.service.BoardService;
+import ua.taskmate.kanban.service.MemberService;
 
 import java.util.List;
 
@@ -24,6 +23,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final MemberService memberService;
     private final Mapper mapper;
 
     @PostMapping()
@@ -87,5 +87,11 @@ public class BoardController {
     ) {
         Board board = boardService.getBoardByIdFetchMembersAndIssues(boardId, includeCancelled);
         return ResponseEntity.ok(mapper.toFullBoardDto(board));
+    }
+
+    @GetMapping("/{boardId}/members")
+    public ResponseEntity<List<PopulatedMemberDto>> getMembers(@PathVariable("boardId") Long boardId) {
+        List<Member> members = memberService.getMembersByBoardId(boardId);
+        return ResponseEntity.ok(memberService.populateMembers(members));
     }
 }
