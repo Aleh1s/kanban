@@ -16,7 +16,7 @@ public class FullMemberDto {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
     private MemberRole role;
-    private String userId;
+    private UserDto user;
     private BoardDto board;
     private List<IssueDto> issues;
     private List<CommentDto> comments;
