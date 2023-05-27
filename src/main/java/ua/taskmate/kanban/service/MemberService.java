@@ -29,22 +29,13 @@ public class MemberService {
                         String.format("Member with userId %s does not exist", userId)));
     }
 
-    public Member getPopulatedMemberById(Long id) {
-        Member member = getMemberById(id);
-        return null;
-    }
-
     @Transactional
-    public void save(Member member) {
+    public void saveMember(Member member) {
         member.setCreatedAt(LocalDateTime.now());
         memberRepository.save(member);
     }
 
     public List<Member> getMembersByUserIdFetchBoard(String userId) {
         return memberRepository.findMembersByUserIdFetchBoard(userId);
-    }
-
-    public void deleteMemberById(Long id) {
-        memberRepository.deleteById(id);
     }
 }

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class UpdateMemberRoleDto {
+public class MemberRoleDto {
     @NotNull(message = "this field cannot be null")
     @Pattern(regexp = "^OWNER|ADMIN|MEMBER$", message = "role value should be from this list [ADMIN, OWNER, MEMBER]")
     private String role;

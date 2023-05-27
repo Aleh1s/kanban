@@ -6,9 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ua.taskmate.kanban.exception.ActionWithoutRightsException;
-import ua.taskmate.kanban.exception.ResourceNotFoundException;
-import ua.taskmate.kanban.exception.ValidationException;
+import ua.taskmate.kanban.dto.RestExceptionDto;
+import ua.taskmate.kanban.exception.*;
 
 import java.util.List;
 import java.util.Map;
@@ -19,21 +18,48 @@ import static java.util.stream.Collectors.*;
 public class ExceptionHandlerController {
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, List<String>>> handleValidationException(ValidationException exception) {
+    public ResponseEntity<RestExceptionDto> handleValidationException(ValidationException exception) {
         Map<String, List<String>> errors = exception.getErrors().stream()
                 .map(objectError -> (FieldError) objectError)
                 .collect(groupingBy(FieldError::getField, mapping(
                         DefaultMessageSourceResolvable::getDefaultMessage, toList())));
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(errors).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException exception){
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<RestExceptionDto> handleResourceNotFoundException(ResourceNotFoundException exception){
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ActionWithoutRightsException.class)
-    public ResponseEntity<String> handleActionWithoutRights(ActionWithoutRightsException exception){
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
+    public ResponseEntity<RestExceptionDto> handleActionWithoutRights(ActionWithoutRightsException exception){
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InviteAlreadyAcceptedException.class)
+    public ResponseEntity<RestExceptionDto> handleInviteAlreadyAccepted(InviteAlreadyAcceptedException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserAlreadyAttachedException.class)
+    public ResponseEntity<RestExceptionDto> handleUserAlreadyAttached(UserAlreadyAttachedException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InviteIsExpiredException.class)
+    public ResponseEntity<RestExceptionDto> handleInviteIsExpired(InviteIsExpiredException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
     }
 }

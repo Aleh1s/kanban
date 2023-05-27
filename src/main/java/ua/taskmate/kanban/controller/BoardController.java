@@ -8,7 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ua.taskmate.kanban.dto.BoardCreationDto;
 import ua.taskmate.kanban.dto.BoardDto;
-import ua.taskmate.kanban.dto.UpdateMemberRoleDto;
+import ua.taskmate.kanban.dto.MemberRoleDto;
 import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.MemberRole;
@@ -55,12 +55,12 @@ public class BoardController {
     @PatchMapping("/{boardId}/members/{memberId}")
     public ResponseEntity<?> updateMemberRole(@PathVariable("boardId") Long boardId,
                                               @PathVariable("memberId") Long memberId,
-                                              @Valid @RequestBody UpdateMemberRoleDto updateMemberRoleDto,
+                                              @Valid @RequestBody MemberRoleDto memberRoleDto,
                                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
-        boardService.updateRole(memberId, boardId, MemberRole.valueOf(updateMemberRoleDto.getRole()));
+        boardService.updateRole(memberId, boardId, MemberRole.valueOf(memberRoleDto.getRole()));
         return ResponseEntity.noContent().build();
     }
 
@@ -68,7 +68,8 @@ public class BoardController {
     public ResponseEntity<List<BoardDto>> getBoardsOfCurrentUser() {
         List<Board> boards = boardService.getBoardsOfCurrentUser();
         List<BoardDto> boardDtoList = boards.stream()
-                .map(mapper::toBoardDto).toList();
+                .map(mapper::toBoardDto)
+                .toList();
         return ResponseEntity.ok(boardDtoList);
     }
 
@@ -77,7 +78,6 @@ public class BoardController {
         boardService.deleteMemberById(id);
         return ResponseEntity.noContent().build();
     }
-
 
 //    @GetMapping("/{boardId}")
 //    public ResponseEntity<BoardDto> getBoard(
