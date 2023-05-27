@@ -1,7 +1,7 @@
 package ua.taskmate.kanban.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ import java.util.UUID;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-    private final JsonMapper jsonMapper;
+    private final ObjectMapper objectMapper;
     private final TokenProvider tokenProvider;
 
     @Value("${security.oauth2.client.id}")
@@ -81,7 +81,7 @@ public class AuthenticationService {
         }
 
         try {
-            return Optional.ofNullable(jsonMapper.readTree(response.getBody())
+            return Optional.ofNullable(objectMapper.readTree(response.getBody())
                     .get("id_token")
                     .asText());
         } catch (JsonProcessingException e) {

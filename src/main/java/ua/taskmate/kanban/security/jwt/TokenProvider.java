@@ -8,7 +8,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import ua.taskmate.kanban.dto.AuthenticationRequest;
 import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.security.UserDetailsImpl;
 
@@ -57,12 +56,11 @@ public class TokenProvider {
     }
 
     public Authentication authentication(String token) {
-        String userId = Jwts.parser()
+        String userId = (String) Jwts.parser()
                 .setSigningKey(jwtSecretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
-
+                .get("userId");
         UserDetails userDetails = new UserDetailsImpl(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
