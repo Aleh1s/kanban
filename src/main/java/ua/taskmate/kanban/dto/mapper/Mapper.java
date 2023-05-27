@@ -1,13 +1,18 @@
 package ua.taskmate.kanban.dto.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ua.taskmate.kanban.dto.*;
 import ua.taskmate.kanban.entity.*;
+import ua.taskmate.kanban.service.MemberService;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class Mapper {
+
+    private final MemberService memberService;
 
     public Board toBoard(BoardCreationDto dto) {
         return Board.builder()
@@ -68,7 +73,6 @@ public class Mapper {
                 .updatedAt(member.getUpdatedAt())
                 .createdAt(member.getCreatedAt())
                 .role(member.getRole())
-                .userId(member.getUserId())
                 .build();
     }
 
@@ -103,4 +107,30 @@ public class Mapper {
                 .build();
     }
 
+    public FullBoardDto toFullBoardDto(Board board) {
+        List<IssueDto> issues = board.getIssues().stream()
+                .map(this::toIssueDto)
+                .toList();
+        List<PopulatedMemberDto> populateMembers = memberService.populateMembers(board.getMembers());
+        return FullBoardDto.builder()
+                .id(board.getId())
+                .name(board.getName())
+                .imageUrl(board.getImageUrl())
+                .updatedAt(board.getUpdatedAt())
+                .createdAt(board.getCreatedAt())
+                .members(populateMembers)
+                .issues(issues)
+                .build();
+    }
+
+    private IssueDto toIssueDto(Issue issue) {
+        return IssueDto.builder()
+                .id(issue.getId())
+                .createdAt(issue.getCreatedAt())
+                .updatedAt(issue.getUpdatedAt())
+                .title(issue.getTitle())
+                .description(issue.getDescription())
+                .status(issue.getStatus())
+                .build();
+    }
 }

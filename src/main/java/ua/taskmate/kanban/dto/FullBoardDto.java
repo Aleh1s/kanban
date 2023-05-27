@@ -16,6 +16,6 @@ public class FullBoardDto {
     private String imageUrl;
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
-    private List<MemberDto> members;
+    private List<PopulatedMemberDto> members;
     private List<IssueDto> issues;
 }

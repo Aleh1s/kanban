@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ua.taskmate.kanban.dto.BoardCreationDto;
 import ua.taskmate.kanban.dto.BoardDto;
+import ua.taskmate.kanban.dto.FullBoardDto;
 import ua.taskmate.kanban.dto.MemberRoleDto;
 import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.entity.Board;
@@ -79,12 +80,12 @@ public class BoardController {
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/{boardId}")
-//    public ResponseEntity<BoardDto> getBoard(
-//            @PathVariable("boardId") Long boardId,
-//            @RequestParam(value = "includeCancelled", required = false, defaultValue = "false") boolean includeCancelled
-//    ) {
-//        Board board = boardService.getBoardByIdFetchMembersFetchIssues(boardId, includeCancelled);
-//        return ResponseEntity.ok(boardMapper.toDto(board));
-//    }
+    @GetMapping("/{boardId}")
+    public ResponseEntity<FullBoardDto> getBoard(
+            @PathVariable("boardId") Long boardId,
+            @RequestParam(value = "includeCancelled", required = false, defaultValue = "false") boolean includeCancelled
+    ) {
+        Board board = boardService.getBoardByIdFetchMembersAndIssues(boardId, includeCancelled);
+        return ResponseEntity.ok(mapper.toFullBoardDto(board));
+    }
 }
