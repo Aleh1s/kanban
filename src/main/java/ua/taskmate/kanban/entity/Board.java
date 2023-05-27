@@ -71,4 +71,14 @@ public class Board {
         this.issues.remove(issue);
         issue.setBoard(null);
     }
+
+    public void addInvite(Invite invite) {
+        this.invites.add(invite);
+        invite.setBoard(this);
+    }
+
+    public void deleteInvite(Invite invite) {
+        this.invites.remove(invite);
+        invite.setBoard(null);
+    }
 }

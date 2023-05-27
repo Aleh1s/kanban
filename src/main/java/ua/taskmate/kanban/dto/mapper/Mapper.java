@@ -87,4 +87,20 @@ public class Mapper {
                 .build();
     }
 
+    public Invite toInvite(InviteCreationDto dto) {
+        return Invite.builder()
+                .role(MemberRole.valueOf(dto.memberRole()))
+                .build();
+    }
+
+    public InviteDto toInviteDto(Invite invite) {
+        return InviteDto.builder()
+                .id(invite.getId())
+                .createdAt(invite.getCreatedAt())
+                .updatedAt(invite.getUpdatedAt())
+                .isAccepted(invite.isAccepted())
+                .role(invite.getRole())
+                .build();
+    }
+
 }

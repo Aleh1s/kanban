@@ -1,9 +1,7 @@
 package ua.taskmate.kanban.dto;
 
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
-import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.MemberRole;
 
 import java.time.LocalDateTime;
@@ -15,5 +13,5 @@ public class InviteDto {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
     private MemberRole role;
-    private BoardDto board;
+    private boolean isAccepted;
 }

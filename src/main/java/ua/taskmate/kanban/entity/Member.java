@@ -22,11 +22,13 @@ public class Member {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Builder.Default
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Builder.Default
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
