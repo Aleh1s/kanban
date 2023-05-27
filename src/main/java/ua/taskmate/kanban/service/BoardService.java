@@ -1,12 +1,14 @@
 package ua.taskmate.kanban.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.Member;
 import ua.taskmate.kanban.entity.MemberRole;
+import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.exception.ActionWithoutRightsException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.repository.BoardRepository;
@@ -14,6 +16,7 @@ import ua.taskmate.kanban.util.Util;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +26,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberService memberService;
+    private final UserService userService;
 
     public Board getBoardById(Long id) {
         return boardRepository.findById(id)
@@ -32,11 +36,12 @@ public class BoardService {
 
     @Transactional
     public void save(Board board) {
-        UserDetails principal = Util.getPrincipal();
+        String userId = Util.getPrincipal().getUsername();
+        User user = userService.getUserById(userId);
         Member owner = Member.builder()
                 .role(MemberRole.OWNER)
-                .userId(principal.getUsername())
                 .build();
+        user.addMember(owner);
         boardRepository.save(board);
         board.addMember(owner);
         memberService.saveMember(owner);
@@ -88,33 +93,43 @@ public class BoardService {
 
     @Transactional
     public void deleteMemberById(Long id) {
+        String userId = Util.getPrincipal().getUsername();
         Member member = memberService.getMemberById(id);
         Board board = member.getBoard();
-        if (!hasRightToUpdateBoard(member.getUserId(), board)) {
+        if (!hasRightToUpdateBoard(userId, board)) {
             throw new ActionWithoutRightsException(
                     "You have no grant to delete member from this board. Only owner and admin can do this!");
         }
         board.deleteMember(member);
     }
 
-    public boolean hasRightToDeleteBoard(String userId, Board board) {
-        Member currentMember = memberService.getMemberByUserId(userId);
-        boolean isMemberOfBoard = board.getMembers().stream()
-                .anyMatch(member -> member.equals(currentMember));
-        if (isMemberOfBoard) {
-            return currentMember.getRole().equals(MemberRole.OWNER);
+
+    public boolean hasRightToUpdateBoard(String userId, Board board) {
+        return hasRightToUpdateBoard(userService.getUserById(userId), board);
+    }
+
+    private boolean hasRightToDeleteBoard(String userId, Board board) {
+        return hasRightToDeleteBoard(userService.getUserById(userId), board);
+    }
+
+    private boolean hasRightToUpdateBoard(User user, Board board) {
+        Optional<Member> member = memberService.findMemberByUserIdAndBoardId(user.getId(), board.getId());
+        if (member.isPresent()) {
+            MemberRole memberRole = member.get().getRole();
+            return memberRole.equals(MemberRole.OWNER) || memberRole.equals(MemberRole.ADMIN);
         }
         return false;
     }
 
-    public boolean hasRightToUpdateBoard(String userId, Board board) {
-        Member currentMember = memberService.getMemberByUserId(userId);
-        boolean isMemberOfBoard = board.getMembers().stream()
-                .anyMatch(member -> member.equals(currentMember));
-        if (isMemberOfBoard) {
-            MemberRole memberRole = currentMember.getRole();
-            return memberRole.equals(MemberRole.OWNER) || memberRole.equals(MemberRole.ADMIN);
-        }
-        return false;
+    private boolean hasRightToDeleteBoard(User user, Board board) {
+        Optional<Member> member = memberService.findMemberByUserIdAndBoardId(user.getId(), board.getId());
+        return member.map(value -> value.getRole().equals(MemberRole.OWNER)).orElse(false);
+    }
+
+    public Board getBoardByIdFetchMembersAndIssues(Long boardId, boolean includeCancelled) {
+        Board board = boardRepository.findBoardByIdFetchIssues(boardId, includeCancelled)
+                .orElseThrow(() -> new ResourceNotFoundException("Board not found!"));
+        Hibernate.initialize(board.getMembers());
+        return board;
     }
 }

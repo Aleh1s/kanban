@@ -1,7 +1,6 @@
 package ua.taskmate.kanban.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +57,9 @@ public class CommentService {
     }
 
     private boolean hasRightForComment(String userId, Comment comment) {
-        return comment.getCreator().getUserId().equals(userId);
+        return comment.getCreator()
+                .getUser()
+                .getId()
+                .equals(userId);
     }
 }

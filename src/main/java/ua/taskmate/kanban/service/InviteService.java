@@ -7,12 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.Invite;
 import ua.taskmate.kanban.entity.Member;
+import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.exception.*;
 import ua.taskmate.kanban.repository.InviteRepository;
 import ua.taskmate.kanban.util.Util;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,6 +22,7 @@ public class InviteService {
     private final InviteRepository inviteRepository;
     private final BoardService boardService;
     private final MemberService memberService;
+    private final UserService userService;
 
     public Invite getInviteById(String id) {
         return inviteRepository.findById(id)
@@ -48,19 +49,16 @@ public class InviteService {
         if (invite.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new InviteIsExpiredException("This invite is already expired!");
         }
-        UserDetails principal = Util.getPrincipal();
-        String userId = principal.getUsername();
+        String userId = Util.getPrincipal().getUsername();
         Board board = invite.getBoard();
-        List<Member> members = board.getMembers();
-        boolean userAlreadyAttached = members.stream()
-                .anyMatch(member -> member.getUserId().equals(userId));
-        if (userAlreadyAttached) {
+        if (memberService.existsMemberByUserIdAndBoardId(userId, board.getId())) {
             throw new UserAlreadyAttachedException("You are already attached to this board!");
         }
+        User user = userService.getUserById(userId);
         Member member = Member.builder()
                 .role(invite.getRole())
-                .userId(userId)
                 .build();
+        user.addMember(member);
         board.addMember(member);
         memberService.saveMember(member);
         invite.setAccepted(true);

@@ -19,18 +19,16 @@ import ua.taskmate.kanban.constant.ApplicationConstant;
 import ua.taskmate.kanban.dto.CodeRequest;
 import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.exception.ForbiddenException;
-import ua.taskmate.kanban.repository.UserRepository;
 import ua.taskmate.kanban.security.jwt.TokenProvider;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ObjectMapper objectMapper;
     private final TokenProvider tokenProvider;
 
@@ -44,17 +42,11 @@ public class AuthenticationService {
     public String authenticate(CodeRequest codeRequest) {
         String idToken = getIdToken(codeRequest.code())
                 .orElseThrow(() -> new ForbiddenException("Unable to get token!"));
-        String sub = parseSub(idToken);
-        Optional<User> userOptional = userRepository.findUserBySub(sub);
-
-        User user;
-        if (userOptional.isEmpty()) {
-            user = new User();
-            user.setId(UUID.randomUUID().toString());
-            user.setSub(sub);
-            userRepository.save(user);
+        User user = parseUser(idToken);
+        if (userService.existsUserBySub(user.getSub())) {
+            userService.updateUserBySub(user.getSub(), user);
         } else {
-            user = userOptional.get();
+            userService.saveUser(user);
         }
 
         return tokenProvider.generateToken(user);
@@ -91,12 +83,21 @@ public class AuthenticationService {
         return Optional.empty();
     }
 
-    private String parseSub(String idToken) {
+    private User parseUser(String idToken) {
         Claims claims = Jwts.parserBuilder()
                 .build()
                 .parseClaimsJwt(idToken.substring(0, idToken.lastIndexOf('.') + 1))
                 .getBody();
-        return (String) claims.get("sub");
+        return claimsToUser(claims);
     }
 
+    private User claimsToUser(Claims claims) {
+        return User.builder()
+                .sub((String) claims.get("sub"))
+                .email((String) claims.get("email"))
+                .profileImageUrl((String) claims.get("picture"))
+                .fistName((String) claims.get("given_name"))
+                .lastName((String) claims.get("family_name"))
+                .build();
+    }
 }

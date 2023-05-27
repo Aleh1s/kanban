@@ -34,8 +34,9 @@ public class Member {
     @Column(name = "role", nullable = false)
     private MemberRole role;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")

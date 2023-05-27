@@ -76,11 +76,10 @@ public class IssueService {
     }
 
     private boolean hasRightToCreateIssue(String userId, Board board) {
-        return board.getMembers().stream()
-                .anyMatch(member -> member.getUserId().equals(userId));
+        return memberService.existsMemberByUserIdAndBoardId(userId, board.getId());
     }
 
     private boolean hasRightForIssue(String userId, Issue issue) {
-        return issue.getCreator().getUserId().equals(userId);
+        return issue.getCreator().getUser().getId().equals(userId);
     }
 }

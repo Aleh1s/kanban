@@ -6,6 +6,9 @@ spring:
   jpa:
     properties:
       hibernate:
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
         hbm2ddl:
           auto: create-drop
   config:
