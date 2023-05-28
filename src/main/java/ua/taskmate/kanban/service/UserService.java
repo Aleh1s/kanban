@@ -34,11 +34,12 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUserBySub(String sub, User updated) {
+    public User updateUserBySub(String sub, User updated) {
         User userToUpdate = getUserBySub(sub);
         userToUpdate.setEmail(updated.getEmail());
         userToUpdate.setProfileImageUrl(updated.getProfileImageUrl());
         userToUpdate.setFistName(updated.getFistName());
         userToUpdate.setLastName(updated.getLastName());
+        return userToUpdate;
     }
 }

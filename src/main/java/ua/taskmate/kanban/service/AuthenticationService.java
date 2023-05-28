@@ -50,7 +50,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new ForbiddenException("Unable to get token!"));
         User user = parseUser(idToken);
         if (userService.existsUserBySub(user.getSub())) {
-            userService.updateUserBySub(user.getSub(), user);
+            user = userService.updateUserBySub(user.getSub(), user);
         } else {
             userService.saveUser(user);
         }
