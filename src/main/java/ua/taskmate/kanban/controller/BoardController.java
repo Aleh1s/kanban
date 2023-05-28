@@ -28,7 +28,7 @@ public class BoardController {
 
     @PostMapping()
     public ResponseEntity<?> createBoard(@RequestBody @Valid BoardCreationDto boardCreationDto,
-                                                        BindingResult bindingResult) {
+                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }

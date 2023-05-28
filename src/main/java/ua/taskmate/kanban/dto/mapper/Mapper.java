@@ -155,7 +155,7 @@ public class Mapper {
                 .build();
     }
 
-    private UserDto toUserDto(User user) {
+    public UserDto toUserDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
