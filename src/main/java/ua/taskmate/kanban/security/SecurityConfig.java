@@ -1,6 +1,8 @@
 package ua.taskmate.kanban.security;
 
+import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +17,8 @@ import ua.taskmate.kanban.security.jwt.TokenFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Value("${jwt.secret.key}")
+    private String jwtSecretKey;
     private final TokenFilter tokenFilter;
 
     @Bean
@@ -34,5 +38,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 ).addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    public Algorithm algorithm() {
+        return Algorithm.HMAC256(jwtSecretKey);
     }
 }

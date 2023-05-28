@@ -1,14 +1,19 @@
 package ua.taskmate.kanban.security.jwt;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ua.taskmate.kanban.entity.User;
+import ua.taskmate.kanban.exception.JwtTokenProcessingException;
 import ua.taskmate.kanban.security.UserDetailsImpl;
 
 import java.util.Date;
@@ -18,30 +23,29 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.nonNull;
 
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
 
-    @Value("${jwt.secret.key}")
-    private String jwtSecretKey;
+    private Algorithm algorithm;
     private static final String TOKEN_START = "Bearer_";
 
-    public boolean validateToken(String token) {
-        return !Jwts.parser()
-                .setSigningKey(jwtSecretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
+    public void validateToken(String token) {
+        boolean expired = JWT.decode(token)
+                .getExpiresAt()
                 .before(new Date());
+        if (expired) {
+            throw new JwtTokenProcessingException(HttpStatus.UNAUTHORIZED, "Token is expired!");
+        }
     }
 
     public String generateToken(User user) {
-        Date now = new Date();
-        Date expired = new Date(now.getTime() + TimeUnit.HOURS.toMillis(1));
-        return Jwts.builder()
-                .claim("userId", user.getId())
-                .setIssuedAt(now)
-                .setExpiration(expired)
-                .signWith(SignatureAlgorithm.HS256, jwtSecretKey)
-                .compact();
+        Date issuedAt = new Date();
+        Date expiredAt = new Date(issuedAt.getTime() + TimeUnit.HOURS.toMillis(1));
+        return JWT.create()
+                .withClaim("userId", user.getId())
+                .withIssuedAt(issuedAt)
+                .withExpiresAt(expiredAt)
+                .sign(algorithm);
     }
 
     public Optional<String> resolveToken(HttpServletRequest request) {
@@ -56,12 +60,21 @@ public class TokenProvider {
     }
 
     public Authentication authentication(String token) {
-        String userId = (String) Jwts.parser()
-                .setSigningKey(jwtSecretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .get("userId");
-        UserDetails userDetails = new UserDetailsImpl(userId);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        try {
+            String userId = JWT.require(algorithm)
+                    .build()
+                    .verify(token)
+                    .getClaim("userId")
+                    .asString();
+            UserDetails userDetails = new UserDetailsImpl(userId);
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        } catch (JWTVerificationException e) {
+            throw new JwtTokenProcessingException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Autowired
+    public void setAlgorithm(@Lazy Algorithm algorithm) {
+        this.algorithm = algorithm;
     }
 }

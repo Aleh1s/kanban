@@ -1,9 +1,9 @@
 package ua.taskmate.kanban.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +25,7 @@ import ua.taskmate.kanban.exception.AuthenticationException;
 import ua.taskmate.kanban.exception.ForbiddenException;
 import ua.taskmate.kanban.security.jwt.TokenProvider;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -96,20 +97,18 @@ public class AuthenticationService {
     }
 
     private User parseUser(String idToken) {
-        Claims claims = Jwts.parserBuilder()
-                .build()
-                .parseClaimsJwt(idToken.substring(0, idToken.lastIndexOf('.') + 1))
-                .getBody();
+        Map<String, Claim> claims = JWT.decode(idToken)
+                .getClaims();
         return claimsToUser(claims);
     }
 
-    private User claimsToUser(Claims claims) {
+    private User claimsToUser(Map<String, Claim> claims) {
         return User.builder()
-                .sub((String) claims.get("sub"))
-                .email((String) claims.get("email"))
-                .profileImageUrl((String) claims.get("picture"))
-                .fistName((String) claims.get("given_name"))
-                .lastName((String) claims.get("family_name"))
+                .sub(claims.get("sub").asString())
+                .email(claims.get("email").asString())
+                .profileImageUrl(claims.get("picture").asString())
+                .fistName(claims.get("given_name").asString())
+                .lastName(claims.get("family_name").asString())
                 .build();
     }
 }
