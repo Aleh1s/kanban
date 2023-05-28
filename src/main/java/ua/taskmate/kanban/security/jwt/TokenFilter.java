@@ -30,7 +30,6 @@ public class TokenFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-
         Optional<String> token = tokenProvider.resolveToken(request);
         try {
             if (token.isPresent()) {

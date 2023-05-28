@@ -13,7 +13,7 @@ import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.service.UserService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 

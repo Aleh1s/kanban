@@ -5,10 +5,7 @@ import org.hibernate.Hibernate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.taskmate.kanban.entity.Board;
-import ua.taskmate.kanban.entity.Member;
-import ua.taskmate.kanban.entity.MemberRole;
-import ua.taskmate.kanban.entity.User;
+import ua.taskmate.kanban.entity.*;
 import ua.taskmate.kanban.exception.ActionWithoutRightsException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.repository.BoardRepository;
@@ -127,8 +124,12 @@ public class BoardService {
     }
 
     public Board getBoardByIdFetchMembersAndIssues(Long boardId, boolean includeCancelled) {
-        Board board = boardRepository.findBoardByIdFetchIssues(boardId, includeCancelled)
-                .orElseThrow(() -> new ResourceNotFoundException("Board not found!"));
+        Board board = getBoardById(boardId);
+        if (!includeCancelled) {
+            board.getIssues().removeIf(issue -> issue.getStatus().equals(Status.CANCELLED));
+        } else {
+            Hibernate.initialize(board.getIssues());
+        }
         Hibernate.initialize(board.getMembers());
         return board;
     }
