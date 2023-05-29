@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    @Query("select distinct m from Member m left join fetch m.board")
+    @Query("select distinct m from Member m left join fetch m.board where m.user.id = :userId")
     List<Member> findMembersByUserIdFetchBoard(String userId);
     Optional<Member> findMemberByUserIdAndBoardId(String userId, Long boardId);
     boolean existsMemberByUserIdAndBoardId(String userId, Long boardId);

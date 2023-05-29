@@ -81,8 +81,8 @@ public class BoardService {
     }
 
     public List<Board> getBoardsOfCurrentUser() {
-        UserDetails principal = Util.getPrincipal();
-        List<Member> members = memberService.getMembersByUserIdFetchBoard(principal.getUsername());
+        String userId = Util.getPrincipal().getUsername();
+        List<Member> members = memberService.getMembersByUserIdFetchBoard(userId);
         return members.stream()
                 .map(Member::getBoard)
                 .collect(Collectors.toList());
