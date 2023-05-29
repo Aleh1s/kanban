@@ -2,14 +2,16 @@ package ua.taskmate.kanban.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ua.taskmate.kanban.entity.MemberRole;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 public class PopulatedMemberDto {
-    private MemberDto member;
-    private String profileImageUrl;
-    private String firstName;
-    private String lastName;
-    private String userId;
-    private String email;
+    private Long id;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
+    private MemberRole role;
+    private UserDto user;
 }

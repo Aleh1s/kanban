@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.taskmate.kanban.dto.MemberDto;
 import ua.taskmate.kanban.dto.PopulatedMemberDto;
+import ua.taskmate.kanban.dto.UserDto;
 import ua.taskmate.kanban.entity.Member;
 import ua.taskmate.kanban.exception.BadRequestException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
@@ -59,18 +59,18 @@ public class MemberService {
         members = memberRepository.findMembersFetchUserByMemberIds(memberIds);
         return members.stream()
                 .map(member -> PopulatedMemberDto.builder()
-                        .member(MemberDto.builder()
-                                .id(member.getId())
-                                .createdAt(member.getCreatedAt())
-                                .updatedAt(member.getUpdatedAt())
-                                .role(member.getRole())
-                                .build())
-                        .userId(member.getUser().getId())
-                        .email(member.getUser().getEmail())
-                        .profileImageUrl(member.getUser().getProfileImageUrl())
-                        .firstName(member.getUser().getFistName())
-                        .lastName(member.getUser().getLastName())
-                        .build())
+                        .id(member.getId())
+                        .createdAt(member.getCreatedAt())
+                        .updatedAt(member.getUpdatedAt())
+                        .role(member.getRole())
+                        .user(UserDto.builder()
+                                .id(member.getUser().getId())
+                                .email(member.getUser().getEmail())
+                                .profileImageUrl(member.getUser().getProfileImageUrl())
+                                .firstName(member.getUser().getFistName())
+                                .lastName(member.getUser().getLastName())
+                                .build()
+                        ).build())
                 .toList();
     }
 
