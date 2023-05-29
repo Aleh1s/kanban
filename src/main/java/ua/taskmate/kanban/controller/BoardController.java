@@ -27,7 +27,7 @@ public class BoardController {
     private final Mapper mapper;
 
     @PostMapping()
-    public ResponseEntity<?> createBoard(@RequestBody @Valid BoardCreationDto boardCreationDto,
+    public ResponseEntity<HttpStatus> createBoard(@RequestBody @Valid BoardCreationDto boardCreationDto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
@@ -37,24 +37,24 @@ public class BoardController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBoard(@PathVariable("id") Long id) {
+    public ResponseEntity<HttpStatus> deleteBoard(@PathVariable("id") Long id) {
         boardService.deleteBoardById(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBoard(@PathVariable("id") Long id,
+    public ResponseEntity<HttpStatus> updateBoard(@PathVariable("id") Long id,
                                          @RequestBody @Valid BoardCreationDto updatedBoard,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
         boardService.updateBoardById(id, mapper.toBoard(updatedBoard));
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/{boardId}/members/{memberId}")
-    public ResponseEntity<?> updateMemberRole(@PathVariable("boardId") Long boardId,
+    public ResponseEntity<HttpStatus> updateMemberRole(@PathVariable("boardId") Long boardId,
                                               @PathVariable("memberId") Long memberId,
                                               @Valid @RequestBody MemberRoleDto memberRoleDto,
                                               BindingResult bindingResult) {
@@ -62,7 +62,7 @@ public class BoardController {
             throw new ValidationException(bindingResult.getAllErrors());
         }
         boardService.updateRole(memberId, boardId, MemberRole.valueOf(memberRoleDto.getRole()));
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping()
@@ -71,13 +71,13 @@ public class BoardController {
         List<BoardDto> boardDtoList = boards.stream()
                 .map(mapper::toBoardDto)
                 .toList();
-        return ResponseEntity.ok(boardDtoList);
+        return new ResponseEntity<>(boardDtoList, HttpStatus.OK);
     }
 
     @DeleteMapping("/members/{id}")
-    public ResponseEntity<?> deleteMember(@PathVariable("id") Long id) {
+    public ResponseEntity<HttpStatus> deleteMember(@PathVariable("id") Long id) {
         boardService.deleteMemberById(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{boardId}")
@@ -86,12 +86,12 @@ public class BoardController {
             @RequestParam(value = "includeCancelled", required = false, defaultValue = "false") boolean includeCancelled
     ) {
         Board board = boardService.getBoardByIdFetchMembersAndIssues(boardId, includeCancelled);
-        return ResponseEntity.ok(mapper.toFullBoardDto(board));
+        return new ResponseEntity<>(mapper.toFullBoardDto(board), HttpStatus.OK);
     }
 
     @GetMapping("/{boardId}/members")
     public ResponseEntity<List<PopulatedMemberDto>> getMembers(@PathVariable("boardId") Long boardId) {
         List<Member> members = memberService.getMembersByBoardId(boardId);
-        return ResponseEntity.ok(memberService.populateMembers(members));
+        return new ResponseEntity<>(memberService.populateMembers(members), HttpStatus.OK);
     }
 }

@@ -28,7 +28,7 @@ public class IssueController {
     private final Mapper mapper;
 
     @PostMapping("/boards/{boardId}")
-    public ResponseEntity<?> createIssue(@PathVariable("boardId") Long boardId,
+    public ResponseEntity<HttpStatus> createIssue(@PathVariable("boardId") Long boardId,
                                          @Valid @RequestBody IssueCreationDto issueCreationDto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -39,14 +39,14 @@ public class IssueController {
     }
 
     @PutMapping("/{issueId}")
-    public ResponseEntity<?> updateIssue(@PathVariable("issueId") Long issueId,
+    public ResponseEntity<HttpStatus> updateIssue(@PathVariable("issueId") Long issueId,
                                          @Valid @RequestBody IssueCreationDto issueCreationDto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
         issueService.update(issueId, mapper.toIssue(issueCreationDto));
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/{id}")
@@ -57,13 +57,13 @@ public class IssueController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteIssue(@PathVariable("id") Long id) {
+    public ResponseEntity<HttpStatus> deleteIssue(@PathVariable("id") Long id) {
         issueService.deleteIssueById(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{issueId}/assignees")
-    public ResponseEntity<?> addAssignee(@PathVariable("issueId") Long issueId,
+    public ResponseEntity<HttpStatus> addAssignee(@PathVariable("issueId") Long issueId,
                                          @RequestBody @Valid AssigneeCreationDto assigneeCreationDto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -74,13 +74,13 @@ public class IssueController {
     }
 
     @DeleteMapping("/{assigneeId}")
-    public ResponseEntity<?> deleteAssignee(@PathVariable("assigneeId") Long assigneeId) {
+    public ResponseEntity<HttpStatus> deleteAssignee(@PathVariable("assigneeId") Long assigneeId) {
         assigneeService.deleteAssigneeById(assigneeId);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{issueId}/comments")
-    public ResponseEntity<?> addComment(@PathVariable("issueId") Long issueId,
+    public ResponseEntity<HttpStatus> addComment(@PathVariable("issueId") Long issueId,
                                         @Valid @RequestBody CommentCreationDto commentCreationDto,
                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -91,19 +91,19 @@ public class IssueController {
     }
 
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable("commentId") Long commentId,
+    public ResponseEntity<HttpStatus> updateComment(@PathVariable("commentId") Long commentId,
                                            @RequestBody @Valid CommentCreationDto commentCreationDto,
                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
         commentService.editComment(commentId, mapper.toComment(commentCreationDto));
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId) {
+    public ResponseEntity<HttpStatus> deleteComment(@PathVariable("commentId") Long commentId) {
         commentService.deleteCommentById(commentId);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

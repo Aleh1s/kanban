@@ -34,8 +34,8 @@ public class InviteController {
     }
 
     @PostMapping("/{inviteId}")
-    public ResponseEntity<?> acceptInvite(@PathVariable("inviteId") String inviteId) {
+    public ResponseEntity<HttpStatus> acceptInvite(@PathVariable("inviteId") String inviteId) {
         inviteService.acceptInvite(inviteId);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
