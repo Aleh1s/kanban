@@ -29,6 +29,8 @@ import ua.taskmate.kanban.security.jwt.TokenProvider;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -116,12 +118,14 @@ public class AuthenticationService {
     }
 
     private User claimsToUser(Map<String, Claim> claims) {
+        Claim givenName = claims.get("given_name");
+        Claim familyName = claims.get("family_name");
         return User.builder()
                 .sub(claims.get("sub").asString())
                 .email(claims.get("email").asString())
                 .profileImageUrl(claims.get("picture").asString())
-                .fistName(claims.get("given_name").asString())
-                .lastName(claims.get("family_name").asString())
+                .fistName(nonNull(givenName) ? givenName.asString() : "")
+                .lastName(nonNull(familyName) ? familyName.asString() : "")
                 .build();
     }
 }
