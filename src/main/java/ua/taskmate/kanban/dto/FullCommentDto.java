@@ -7,9 +7,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class AssigneeDto {
+public class FullCommentDto {
     private Long id;
-    private LocalDateTime updatedAt;
+    private String content;
     private LocalDateTime createdAt;
-    private MemberDto member;
+    private LocalDateTime updatedAt;
+    private MemberDto creator;
+    private IssueDto issue;
 }

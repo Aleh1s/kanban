@@ -11,6 +11,8 @@ import ua.taskmate.kanban.entity.Member;
 import ua.taskmate.kanban.exception.MemberAlreadyAssignedException;
 import ua.taskmate.kanban.repository.AssigneeRepository;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -38,6 +40,10 @@ public class AssigneeService {
         assigneeRepository.deleteById(assigneeId);
     }
 
+    public List<Assignee> getAssigneesByIssueIdFetchIssueAndMember(Long issueId) {
+        return assigneeRepository.findAssigneesByIssueIdFetchIssueAndMember(issueId);
+    }
+
     public boolean isUserAlreadyAssignedToIssue(String userId, Long issueId) {
         return assigneeRepository.isUserAlreadyAssignedToIssue(userId, issueId);
     }
@@ -46,4 +52,5 @@ public class AssigneeService {
     public void setIssueService(@Lazy IssueService issueService) {
         this.issueService = issueService;
     }
+
 }

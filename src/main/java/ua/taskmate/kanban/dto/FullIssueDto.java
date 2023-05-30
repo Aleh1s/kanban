@@ -3,7 +3,6 @@ package ua.taskmate.kanban.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ua.taskmate.kanban.entity.Member;
 import ua.taskmate.kanban.entity.Status;
 
 import java.time.LocalDateTime;
@@ -20,6 +19,6 @@ public class FullIssueDto {
     private String description;
     private Status status;
     private MemberDto creator;
-    private List<CommentDto> comments;
-    private List<AssigneeDto> assignees;
+    private List<FullCommentDto> comments;
+    private List<FullAssigneeDto> assignees;
 }

@@ -12,14 +12,16 @@ import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.repository.CommentRepository;
 import ua.taskmate.kanban.util.Util;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CommentService {
 
-    private final IssueService issueService;
     private final MemberService memberService;
     private final CommentRepository commentRepository;
+    private final IssueService issueService;
 
     public Comment getCommentById(Long id) {
         return commentRepository.findById(id)
@@ -40,7 +42,7 @@ public class CommentService {
     public void editComment(Long commentId, Comment updatedComment) {
         UserDetails principal = Util.getPrincipal();
         Comment commentToUpdate = getCommentById(commentId);
-        if (!hasRightForComment(principal.getUsername(), commentToUpdate)) {
+        if (hasNoRightForComment(principal.getUsername(), commentToUpdate)) {
             throw new ActionWithoutRightsException("You have no grant to edit comment!");
         }
         commentToUpdate.setContent(updatedComment.getContent());
@@ -50,14 +52,19 @@ public class CommentService {
     public void deleteCommentById(Long commentId) {
         UserDetails principal = Util.getPrincipal();
         Comment commentToDelete = getCommentById(commentId);
-        if (!hasRightForComment(principal.getUsername(), commentToDelete)) {
+        if (hasNoRightForComment(principal.getUsername(), commentToDelete)) {
             throw new ActionWithoutRightsException("You have no grant to delete comment!");
         }
         commentRepository.deleteById(commentId);
     }
 
-    private boolean hasRightForComment(String userId, Comment comment) {
-        return comment.getCreator()
+
+    public List<Comment> getCommentsByIssueIdFetchCreatorAndIssue(Long issueId) {
+        return commentRepository.findCommentsByIssueIdFetchCreatorAndIssue(issueId);
+    }
+
+    private boolean hasNoRightForComment(String userId, Comment comment) {
+        return !comment.getCreator()
                 .getUser()
                 .getId()
                 .equals(userId);
