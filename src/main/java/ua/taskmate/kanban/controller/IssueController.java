@@ -6,12 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ua.taskmate.kanban.dto.AssigneeCreationDto;
-import ua.taskmate.kanban.dto.CommentCreationDto;
-import ua.taskmate.kanban.dto.FullIssueDto;
-import ua.taskmate.kanban.dto.IssueCreationDto;
+import ua.taskmate.kanban.dto.*;
 import ua.taskmate.kanban.dto.mapper.Mapper;
 import ua.taskmate.kanban.entity.Issue;
+import ua.taskmate.kanban.entity.Status;
 import ua.taskmate.kanban.exception.ValidationException;
 import ua.taskmate.kanban.service.AssigneeService;
 import ua.taskmate.kanban.service.CommentService;
@@ -49,6 +47,17 @@ public class IssueController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PatchMapping("/{issueId}/status")
+    public ResponseEntity<HttpStatus> updateIssueStatus(@PathVariable("issueId") Long issueId,
+                                                        @Valid @RequestBody IssueStatusDto issueStatusDto,
+                                                        BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult.getAllErrors());
+        }
+        issueService.updateIssueStatus(issueId, Status.valueOf(issueStatusDto.status()));
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<FullIssueDto> getIssue(@PathVariable("id") Long id) {
         Issue issue = issueService.getIssueByIdFetchCreatorAndCommentsAndAssignees(id);
@@ -73,7 +82,7 @@ public class IssueController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{assigneeId}")
+    @DeleteMapping("/assignees/{assigneeId}")
     public ResponseEntity<HttpStatus> deleteAssignee(@PathVariable("assigneeId") Long assigneeId) {
         assigneeService.deleteAssigneeById(assigneeId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.taskmate.kanban.entity.Board;
 import ua.taskmate.kanban.entity.Issue;
 import ua.taskmate.kanban.entity.Member;
+import ua.taskmate.kanban.entity.Status;
 import ua.taskmate.kanban.exception.ActionWithoutRightsException;
 import ua.taskmate.kanban.exception.ResourceNotFoundException;
 import ua.taskmate.kanban.repository.IssueRepository;
@@ -23,6 +24,7 @@ public class IssueService {
     private final BoardService boardService;
     private final IssueRepository issueRepository;
     private final MemberService memberService;
+    private final AssigneeService assigneeService;
 
     public Issue getIssueById(Long id) {
         return issueRepository.findById(id)
@@ -66,13 +68,23 @@ public class IssueService {
 
     @Transactional
     public void deleteIssueById(Long id) {
-        UserDetails principal = Util.getPrincipal();
+        String userId = Util.getPrincipal().getUsername();
         Issue issue = getIssueById(id);
         Board board = issue.getBoard();
-        if (!hasRightForIssue(principal.getUsername(), issue)) {
+        if (!hasRightForIssue(userId, issue)) {
             throw new ActionWithoutRightsException("You have no rights to delete this issue!");
         }
         board.deleteIssue(issue);
+    }
+
+    @Transactional
+    public void updateIssueStatus(Long issueId, Status status) {
+        String userId = Util.getPrincipal().getUsername();
+        Issue issue = getIssueById(issueId);
+        if (!assigneeService.isUserAlreadyAssignedToIssue(userId, issueId)) {
+            throw new ActionWithoutRightsException("You have no rights to update status of this issue!");
+        }
+        issue.setStatus(status);
     }
 
     private boolean hasRightToCreateIssue(String userId, Board board) {

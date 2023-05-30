@@ -76,4 +76,11 @@ public class ExceptionHandlerController {
                 .payload(exception.getMessage()).build();
         return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_GATEWAY);
     }
+
+    @ExceptionHandler(MemberAlreadyAssignedException.class)
+    public ResponseEntity<RestExceptionDto> handleMemberAlreadyAssigned(MemberAlreadyAssignedException exception) {
+        RestExceptionDto restExceptionDto = RestExceptionDto.builder()
+                .payload(exception.getMessage()).build();
+        return new ResponseEntity<>(restExceptionDto, HttpStatus.BAD_REQUEST);
+    }
 }
