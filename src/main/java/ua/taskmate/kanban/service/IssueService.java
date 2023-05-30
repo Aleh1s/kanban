@@ -1,7 +1,6 @@
 package ua.taskmate.kanban.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +31,9 @@ public class IssueService {
                         String.format("Issue with userId %d does not exist", id)));
     }
 
-    public Issue getIssueByIdFetchCreatorAndCommentsAndAssignees(Long id) {
-        Issue issue = getIssueById(id);
-        Hibernate.initialize(issue.getCreator());
-        Hibernate.initialize(issue.getComments());
-        Hibernate.initialize(issue.getAssignees());
-        return issue;
+    public Issue getIssueByIdFetchCreator(Long issueId) {
+        return issueRepository.findIssueByIdFetchCreator(issueId)
+                .orElseThrow(() -> new ResourceNotFoundException("Issue not found!"));
     }
 
     @Transactional
@@ -57,7 +53,7 @@ public class IssueService {
     public void update(Long issueId, Issue updatedIssue) {
         UserDetails principal = Util.getPrincipal();
         Issue issueToUpdate = getIssueById(issueId);
-        if (!hasRightForIssue(principal.getUsername(), issueToUpdate)) {
+        if (hasNoRightForIssue(principal.getUsername(), issueToUpdate)) {
             throw new ActionWithoutRightsException("You have no rights to update this issue!");
         }
         issueToUpdate.setTitle(updatedIssue.getTitle());
@@ -71,7 +67,7 @@ public class IssueService {
         String userId = Util.getPrincipal().getUsername();
         Issue issue = getIssueById(id);
         Board board = issue.getBoard();
-        if (!hasRightForIssue(userId, issue)) {
+        if (hasNoRightForIssue(userId, issue)) {
             throw new ActionWithoutRightsException("You have no rights to delete this issue!");
         }
         board.deleteIssue(issue);
@@ -91,7 +87,7 @@ public class IssueService {
         return memberService.existsMemberByUserIdAndBoardId(userId, board.getId());
     }
 
-    private boolean hasRightForIssue(String userId, Issue issue) {
-        return issue.getCreator().getUser().getId().equals(userId);
+    private boolean hasNoRightForIssue(String userId, Issue issue) {
+        return !issue.getCreator().getUser().getId().equals(userId);
     }
 }

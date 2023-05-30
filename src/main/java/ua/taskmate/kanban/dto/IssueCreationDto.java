@@ -18,7 +18,7 @@ public class IssueCreationDto {
     private String title;
     @NotNull(message = "this field cannot be null")
     @NotBlank(message = "this field cannot be blank")
-    @Size(min = 10, max = 80_000, message = "length should be between 10 and 80000")
+    @Size(max = 80_000, message = "length should be between 10 and 80000")
     private String description;
     @NotNull(message = "this field cannot be null")
     @Pattern(regexp = "^BACKLOG|TO_DO|IN_PROGRESS|DONE|CANCELLED$",

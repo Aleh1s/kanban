@@ -39,22 +39,32 @@ public class Mapper {
                 .build();
     }
 
-    public FullIssueDto toFullIssueDto(Issue issue) {
-        List<CommentDto> comments = issue.getComments().stream()
-                .map(this::toCommentDto).toList();
-        List<AssigneeDto> assignees = issue.getAssignees().stream()
-                .map(this::toAssigneeDto).toList();
-        MemberDto creator = toMemberDto(issue.getCreator());
+    public FullIssueDto toFullIssueDto(Issue issue, List<Assignee> assignees, List<Comment> comments) {
+        List<FullCommentDto> commentsDtoList = comments.stream()
+                .map(this::toFullCommentDto).toList();
+        List<FullAssigneeDto> assigneesDtoList = assignees.stream()
+                .map(this::toFullAssigneeDto).toList();
         return FullIssueDto.builder()
                 .id(issue.getId())
-                .updatedAt(issue.getUpdatedAt())
                 .createdAt(issue.getUpdatedAt())
+                .updatedAt(issue.getUpdatedAt())
                 .title(issue.getTitle())
                 .description(issue.getDescription())
                 .status(issue.getStatus())
-                .creator(creator)
-                .comments(comments)
-                .assignees(assignees)
+                .creator(toMemberDto(issue.getCreator()))
+                .comments(commentsDtoList)
+                .assignees(assigneesDtoList)
+                .build();
+    }
+
+    private FullCommentDto toFullCommentDto(Comment comment) {
+        return FullCommentDto.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .creator(toMemberDto(comment.getCreator()))
+                .issue(toIssueDto(comment.getIssue()))
                 .build();
     }
 
@@ -76,13 +86,14 @@ public class Mapper {
                 .build();
     }
 
-    public AssigneeDto toAssigneeDto(Assignee assignee) {
-        return AssigneeDto.builder()
+    public FullAssigneeDto toFullAssigneeDto(Assignee assignee) {
+        return FullAssigneeDto.builder()
                 .id(assignee.getId())
                 .createdAt(assignee.getCreatedAt())
                 .updatedAt(assignee.getUpdatedAt())
+                .issue(toIssueDto(assignee.getIssue()))
+                .member(toMemberDto(assignee.getMember()))
                 .build();
-
     }
 
     public Comment toComment(CommentCreationDto dto) {

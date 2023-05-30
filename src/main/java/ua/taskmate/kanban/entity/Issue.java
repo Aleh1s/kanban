@@ -49,13 +49,11 @@ public class Issue {
     private Board board;
 
     @Builder.Default
-    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "issue", fetch = FetchType.LAZY,
             orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
     @Builder.Default
-    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "issue", fetch = FetchType.LAZY,
             orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Assignee> assignees = new ArrayList<>();
@@ -65,18 +63,8 @@ public class Issue {
         assignee.setIssue(this);
     }
 
-    public void deleteAssignee(Assignee assignee) {
-        this.assignees.remove(assignee);
-        assignee.setIssue(null);
-    }
-
     public void addComment(Comment comment) {
         this.comments.add(comment);
         comment.setIssue(this);
-    }
-
-    public void deleteComment(Comment comment) {
-        this.comments.remove(comment);
-        comment.setIssue(null);
     }
 }
