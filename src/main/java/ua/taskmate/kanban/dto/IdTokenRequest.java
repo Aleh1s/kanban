@@ -2,9 +2,8 @@ package ua.taskmate.kanban.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-public record CodeRequest(
+public record IdTokenRequest(
         @NotNull(message = "this field cannot be null")
-        String code
+        String idToken
 ) {
-
 }

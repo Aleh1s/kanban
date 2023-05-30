@@ -20,6 +20,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ua.taskmate.kanban.constant.ApplicationConstant;
 import ua.taskmate.kanban.dto.CodeRequest;
+import ua.taskmate.kanban.dto.IdTokenRequest;
 import ua.taskmate.kanban.entity.User;
 import ua.taskmate.kanban.exception.AuthenticationException;
 import ua.taskmate.kanban.exception.ForbiddenException;
@@ -46,15 +47,18 @@ public class AuthenticationService {
     @Value("${security.oauth2.redirectUri}")
     private String redirectUri;
     @Transactional
-    public String authenticate(CodeRequest codeRequest) {
+    public String authenticateUsingCode(CodeRequest codeRequest) {
         String idToken = getIdToken(codeRequest.code())
                 .orElseThrow(() -> new ForbiddenException("Unable to get token!"));
         User user = parseUser(idToken);
-        if (userService.existsUserBySub(user.getSub())) {
-            user = userService.updateUserBySub(user.getSub(), user);
-        } else {
-            userService.saveUser(user);
-        }
+        user = saveOrUpdateUser(user);
+        return tokenProvider.generateToken(user);
+    }
+
+    @Transactional
+    public String authenticateUsingIdToken(IdTokenRequest idTokenRequest) {
+        User user = parseUser(idTokenRequest.idToken());
+        saveOrUpdateUser(user);
         return tokenProvider.generateToken(user);
     }
 
@@ -75,7 +79,7 @@ public class AuthenticationService {
 
         ResponseEntity<String> response;
         try {
-             response = restTemplate.postForEntity(ApplicationConstant.TOKEN_URL, request, String.class);
+            response = restTemplate.postForEntity(ApplicationConstant.TOKEN_URL, request, String.class);
         } catch (RestClientException e) {
             log.error(e.getMessage(), e);
             throw new AuthenticationException("Something went wrong during authorization. Please try again later.");
@@ -100,6 +104,15 @@ public class AuthenticationService {
         Map<String, Claim> claims = JWT.decode(idToken)
                 .getClaims();
         return claimsToUser(claims);
+    }
+
+    private User saveOrUpdateUser(User user) {
+        if (userService.existsUserBySub(user.getSub())) {
+            user = userService.updateUserBySub(user.getSub(), user);
+        } else {
+            userService.saveUser(user);
+        }
+        return user;
     }
 
     private User claimsToUser(Map<String, Claim> claims) {

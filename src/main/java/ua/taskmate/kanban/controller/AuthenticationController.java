@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import ua.taskmate.kanban.constant.ApplicationConstant;
 import ua.taskmate.kanban.dto.CodeRequest;
+import ua.taskmate.kanban.dto.IdTokenRequest;
 import ua.taskmate.kanban.dto.TokenResponse;
 import ua.taskmate.kanban.dto.UrlResponse;
 import ua.taskmate.kanban.exception.ValidationException;
@@ -38,12 +39,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/oauth")
-    public ResponseEntity<TokenResponse> authorize(@RequestBody @Valid CodeRequest codeRequest,
-                                                   BindingResult bindingResult) {
+    public ResponseEntity<TokenResponse> authorizeUsingCode(@RequestBody @Valid CodeRequest codeRequest,
+                                                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult.getAllErrors());
         }
-        String jwtToken = authenticationService.authenticate(codeRequest);
+        String jwtToken = authenticationService.authenticateUsingCode(codeRequest);
+        return new ResponseEntity<>(new TokenResponse(jwtToken), HttpStatus.OK);
+    }
+
+    @PostMapping("/oauth/id-token")
+    public ResponseEntity<TokenResponse> authorizeUsingIdToken(@RequestBody @Valid IdTokenRequest idTokenRequest,
+                                                               BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult.getAllErrors());
+        }
+        String jwtToken = authenticationService.authenticateUsingIdToken(idTokenRequest);
         return new ResponseEntity<>(new TokenResponse(jwtToken), HttpStatus.OK);
     }
 }
