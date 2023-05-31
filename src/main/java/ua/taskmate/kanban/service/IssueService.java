@@ -23,12 +23,11 @@ public class IssueService {
     private final BoardService boardService;
     private final IssueRepository issueRepository;
     private final MemberService memberService;
-    private final AssigneeService assigneeService;
 
     public Issue getIssueById(Long id) {
         return issueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Issue with userId %d does not exist", id)));
+                        String.format("Issue with id %d does not exist", id)));
     }
 
     public Issue getIssueByIdFetchCreator(Long issueId) {
@@ -75,11 +74,7 @@ public class IssueService {
 
     @Transactional
     public void updateIssueStatus(Long issueId, Status status) {
-        String userId = Util.getPrincipal().getUsername();
         Issue issue = getIssueById(issueId);
-        if (!assigneeService.isUserAlreadyAssignedToIssue(userId, issueId)) {
-            throw new ActionWithoutRightsException("You have no rights to update status of this issue!");
-        }
         issue.setStatus(status);
     }
 
