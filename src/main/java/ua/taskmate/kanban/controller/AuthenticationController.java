@@ -28,7 +28,7 @@ public class AuthenticationController {
     @Value("${security.oauth2.redirectUri}")
     private String redirectUri;
 
-    @GetMapping("/url")
+    @GetMapping("/sign-in")
     public ResponseEntity<UrlResponse> getOAuthUrl() {
         UriComponentsBuilder url = UriComponentsBuilder.fromHttpUrl(ApplicationConstant.AUTH_URL)
                 .queryParam("client_id", clientId)
