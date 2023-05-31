@@ -60,7 +60,7 @@ public class AuthenticationService {
     @Transactional
     public String authenticateUsingIdToken(IdTokenRequest idTokenRequest) {
         User user = parseUser(idTokenRequest.idToken());
-        saveOrUpdateUser(user);
+        user = saveOrUpdateUser(user);
         return tokenProvider.generateToken(user);
     }
 
